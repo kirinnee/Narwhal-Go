@@ -4,13 +4,17 @@ stages:
   - build
   - deploy
 
+variables:
+  BIN_NAME: narwhal
+
 Build:
   stage: build
   script:
     - mkdir build
-    - env GOOS=windows GOARCH=amd64 go build -o /builds/atomi-cloud/anode/build/anode.exe
-    - env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -a -installsuffix cgo -o /builds/atomi-cloud/anode/build/anode
-    - env GOOS=darwin GOARCH=amd64 go build -o /builds/atomi-cloud/anode/build/anode-mac
+    - env GOOS=windows GOARCH=amd64 go build -o /builds/atomi-cloud/anode/build/${BIN_NAME}.exe
+    - env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -a -installsuffix cgo -o /builds/atomi-cloud/anode/build/${BIN_NAME}
+    - chmod o+x ${BIN_NAME}
+    - env GOOS=darwin GOARCH=amd64 go build -o /builds/atomi-cloud/anode/build/${BIN_NAME}.app
   artifacts:
     paths:
       - ./build/
