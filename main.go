@@ -13,20 +13,20 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
-			Name:        "load",
-			Aliases:     []string{"l"},
-			Description: "loads tarball into a docker volume",
-			Usage:       "load <path to tar> <volume name>",
+			Name:      "load",
+			Aliases:   []string{"l"},
+			Usage:     "loads tarball into a docker volume",
+			ArgsUsage: "[path-to-tar] [volume-name]",
 			Action: func(c *cli.Context) error {
 				fmt.Println("added task: ", c.Args().First())
 				return nil
 			},
 		},
 		{
-			Name:        "save",
-			Aliases:     []string{"s"},
-			Description: "saves a docker volume as a tarball",
-			Usage:       "save <volume name> <tar name> <path to save to>",
+			Name:      "save",
+			Aliases:   []string{"s"},
+			Usage:     "saves a docker volume as a tarball",
+			ArgsUsage: "[volume-name] [tar-name] [path-to-save]",
 			Action: func(c *cli.Context) error {
 				fmt.Println("completed task: ", c.Args().First())
 				return nil
@@ -46,14 +46,25 @@ func main() {
 		},
 	}
 
-	app.EnableBashCompletion = true
-	app.BashComplete = func(c *cli.Context) {
-		if c.NArg() > 0 {
-			return
-		}
-		fmt.Println("load")
-		fmt.Println("save")
-	}
+	cli.AppHelpTemplate = `{{.Name}} - {{.Usage}}
+VERSION: {{.Version}}
+USAGE:
+   {{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}
+   {{if len .Authors}}
+AUTHOR:
+   {{range .Authors}}{{ . }}{{end}}
+   {{end}}{{if .Commands}}
+COMMANDS:
+{{range .Commands}}{{if not .HideHelp}}   {{join .Names ", "}}{{ "\t"}}{{.Usage}}{{ "\n" }}{{end}}{{end}}{{end}}{{if .VisibleFlags}}
+GLOBAL OPTIONS:
+   {{range .VisibleFlags}}{{.}}
+   {{end}}{{end}}{{if .Copyright }}
+COPYRIGHT:
+   {{.Copyright}}
+   {{end}}{{if .Version}}
+
+   {{end}}
+`
 
 	err := app.Run(os.Args)
 	if err != nil {

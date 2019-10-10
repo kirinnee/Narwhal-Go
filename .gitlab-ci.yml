@@ -8,12 +8,6 @@ Build:
   stage: build
   script:
     - mkdir build
-    - cd ..
-    - mkdir -p $GOPATH/src/gitlab.com/atomi-cloud
-    - cp -ar anode $GOPATH/src/gitlab.com/atomi-cloud
-    - cd $GOPATH/src/gitlab.com/atomi-cloud/anode/anode
-    - go get -d -v -t
-    - mkdir build
     - env GOOS=windows GOARCH=amd64 go build -o /builds/atomi-cloud/anode/build/anode.exe
     - env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -a -installsuffix cgo -o /builds/atomi-cloud/anode/build/anode
     - env GOOS=darwin GOARCH=amd64 go build -o /builds/atomi-cloud/anode/build/anode-mac
