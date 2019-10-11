@@ -57,7 +57,7 @@ func main() {
 
 	app.Name = "Narwhal"
 	app.Description = "A command line interface that allows you to load and save docker volumes as tarballs"
-	app.Version = "0.0.1"
+	app.Version = "0.1.0"
 	app.Usage = "A docker volume helper"
 	app.Compiled = time.Now()
 	app.Authors = []cli.Author{
