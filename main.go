@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 	"github.com/urfave/cli"
+	"gitlab.com/kiringo/narwhal_lib"
 	"log"
 	"os"
 	"time"
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	app := cli.NewApp()
-
+	n := narwhal_lib.Narwhal{}
 	app.Commands = []cli.Command{
 		{
 			Name:      "load",
@@ -18,8 +19,12 @@ func main() {
 			Usage:     "loads tarball into a docker volume",
 			ArgsUsage: "[path-to-tar] [volume-name]",
 			Action: func(c *cli.Context) error {
-				fmt.Println("added task: ", c.Args().First())
-				return nil
+				if len(c.Args()) < 2 {
+					return errors.New("need at least 2 arguments")
+				} else {
+					n.Load(c.Args()[1], c.Args()[0])
+					return nil
+				}
 			},
 		},
 		{
@@ -28,7 +33,23 @@ func main() {
 			Usage:     "saves a docker volume as a tarball",
 			ArgsUsage: "[volume-name] [tar-name] [path-to-save]",
 			Action: func(c *cli.Context) error {
-				fmt.Println("completed task: ", c.Args().First())
+				l := len(c.Args())
+				var volume string
+				tarName := "data"
+				path := "./"
+				if l == 0 {
+					return errors.New("need at least 1 arguments")
+				}
+				if l > 0 {
+					volume = c.Args()[0]
+				}
+				if l > 1 {
+					tarName = c.Args()[1]
+				}
+				if l > 2 {
+					path = c.Args()[2]
+				}
+				n.Save(volume, tarName, path)
 				return nil
 			},
 		},
