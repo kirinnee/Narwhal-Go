@@ -5,16 +5,24 @@ stages:
   - deploy
 
 variables:
-  BIN_NAME: narwhal
+  AUTHOR: kirinnee
+  EMAIL: kirinnee97@gmail.com
+  BINARY: narwhal
+  BINARY_NAME: narwhal
+  FOLDER: ${BINARY_NAME}-${CI_COMMIT_TAG}
+  SECTION: utils
+  DESC_SHORT: Command line utility to load and save docker volumes as tarball
+  DESC_LONG: A go-based CLI to help load and save named docker volumes as tarballs
+  TARGET_PPA: kirinnee/main
 
 Build:
   stage: build
   script:
     - mkdir - p ./build
-    - env GOOS=windows GOARCH=amd64 go build -o ./build/${BIN_NAME}.exe
-    - env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -a -installsuffix cgo -o ./build/${BIN_NAME}
-    - chmod o+x ./build/${BIN_NAME}
-    - env GOOS=darwin GOARCH=amd64 go build -o ./build/${BIN_NAME}.app
+    - env GOOS=windows GOARCH=amd64 go build -o ./build/${BINARY}.exe
+    - env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -a -installsuffix cgo -o ./build/${BINARY}
+    - chmod o+x ./build/${BINARY}
+    - env GOOS=darwin GOARCH=amd64 go build -o ./build/${BINARY}.app
   artifacts:
     paths:
       - ./build/
@@ -23,4 +31,43 @@ Build:
 Deploy:
   stage: deploy
   script:
-    - echo "Hi"
+    # move binaries
+    - cp ./build/${BINARY} .
+    # import pgp
+    - gpg || true
+    - gpg --import ${PGP_PRIVATE}
+    - gpg --import ${PGP_PUBLIC}
+    - gpg --import-ownertrust ${PGP_TRUST}
+
+    # setup folder
+    - mkdir -p ${FOLDER}
+    - cp ${BINARY} ${FOLDER}/${BINARY}
+    - cd ${FOLDER}
+    # dh make
+    - env DEBEMAIL=${EMAIL} DEBFULLNAME=${AUTHOR} dh_make --createorig --indep --copyright mit -y
+    - rm debian/*ex debian/*.EX debian/README.*
+
+    # update control and changelog
+    - perl -i -pe "s/unstable/$(lsb_release -cs)/" debian/changelog
+    - perl -i -pe 's/^(Section:).*/$1 $ENV{'SECTION'}/' debian/control
+    - perl -i -pe 's/^(Homepage:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
+    - perl -i -pe 's/^#(Vcs-Browser:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
+    - perl -i -pe 's/^#(Vcs-Git:).*/$1 $ENV{'CI_REPOSITORY_URL'}/' debian/control
+    - perl -i -pe 's/^(Description:).*/$1 $ENV{'DESC_SHORT'}/' debian/control
+    - perl -i -pe 's/^ <insert long description.*/ $ENV{'DESC_LONG'}/' debian/control
+    - perl -i -pe 's/^(Standards-Version:) 3.9.6/$1 3.9.7/' debian/control
+    - >
+      perl -i -0777 -pe "s/(Copyright: ).+\n +.+/\${1}$(date +%Y) $ENV{'AUTHOR'} <$ENV{'EMAIL'}>/" debian/copyright
+    - echo "${BINARY} usr/bin" > debian/install
+
+    # build package
+    - debuild -S
+
+    # publish
+    - cd ..
+    - dput ppa:${TARGET_PPA} $(ls | grep *.changes)
+
+  only:
+    - /^*.*$/
+  except:
+    - branches
