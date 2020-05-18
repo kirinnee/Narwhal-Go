@@ -1,5 +1,5 @@
 # Narwhal Go 
-
+![narwha](./narwhal.png)
 A Docker Utility CLI that contains command to help with you development.
 
 This tool contains dangerous commands and we do not recommend you to install
@@ -14,27 +14,15 @@ sudo add-apt-repository ppa:kirinnee/main
 sudo apt-get update
 sudo apt-get install narwhal
 ```
-or if `narhwal` is too long, to install as nw:
-
-Bash:
-```bash
-echo "alias nw='narwhal'" >> ~/.bash_aliases
-source ~/.bashrc
-```
-
-Zsh:
-```bash
-echo "alias d='docker'" >> ~/.zshrc
-source ~/.zshrc
-```
-
 
 ### Go installation
 ```shell
+go get gitlab.com/kiringo/narwhal 
 go install gitlab.com/kiringo/narwhal 
 ```
 or if `narhwal` is too long, to install as nw:
 ```shell
+go get gitlab.com/kiringo/narwhal 
 go build -i -o nw gitlab.com/kiringo/narwhal
 ```
 
@@ -159,7 +147,7 @@ removing a volume, exactly same as `docker` cli. You can use all options availab
 ```bash
 narwhal volume remove <volume-name> [opts]
 # or
-nw vr <volume-name> [opts]
+nw v r <volume-name> [opts]
 ```
 
 ## Containers
