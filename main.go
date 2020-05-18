@@ -2,65 +2,188 @@ package main
 
 import (
 	"errors"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 	"gitlab.com/kiringo/narwhal_lib"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
+var n = narwhal_lib.New(false)
+
+var NOOP = func(s string) {}
+
 func main() {
 	app := cli.NewApp()
-	n := narwhal_lib.Narwhal{}
-	app.Commands = []cli.Command{
+
+	app.Commands = []*cli.Command{
 		{
-			Name:      "load",
-			Aliases:   []string{"l"},
-			Usage:     "loads tarball into a docker volume",
-			ArgsUsage: "[path-to-tar] [volume-name]",
-			Action: func(c *cli.Context) error {
-				if len(c.Args()) < 2 {
-					return errors.New("need at least 2 arguments")
-				} else {
-					n.Load(c.Args()[1], c.Args()[0])
-					return nil
-				}
+			Name:      "setup",
+			Usage:     "enable auto complete for bash, zsh or PowerShell",
+			ArgsUsage: "[shell type (bash|zsh|powershell)]",
+			Action:    setup,
+		},
+		{
+			Name:         "teardown",
+			Aliases:      []string{"td"},
+			Usage:        "disable auto complete for bash, zsh or PowerShell",
+			ArgsUsage:    "[shell type (bash|zsh|powershell)]",
+			Action:       teardown,
+			BashComplete: teardownComplete,
+		},
+		{
+			Name:      "alias",
+			Aliases:   []string{"al"},
+			Usage:     "manage the 'nw' alias",
+			ArgsUsage: "[add|remove] [shell type (bash|zsh|powershell)]",
+			Subcommands: []*cli.Command{
+				{
+					Name:         "add",
+					Aliases:      []string{"a"},
+					Usage:        "add the 'nw' alias",
+					ArgsUsage:    "[shell type (bash|zsh|powershell)] [$profile(for PowerShell Users)]",
+					Action:       addAlias,
+					BashComplete: addAliasComplete,
+				},
+				{
+					Name:         "remove",
+					Aliases:      []string{"r"},
+					Usage:        "remove the 'nw' alias",
+					ArgsUsage:    "[shell type (bash|zsh|powershell)] [$profile(for PowerShell Users)]",
+					Action:       removeAlias,
+					BashComplete: removeAliasComplete,
+				},
 			},
 		},
 		{
-			Name:      "save",
-			Aliases:   []string{"s"},
-			Usage:     "saves a docker volume as a tarball",
-			ArgsUsage: "[volume-name] [tar-name] [path-to-save]",
+			Name:         "load",
+			Aliases:      []string{"l"},
+			Usage:        "loads tarball into a docker volume",
+			ArgsUsage:    "[path-to-tar] [volume-name]",
+			Action:       load,
+			BashComplete: loadComplete,
+		},
+		{
+			Name:         "save",
+			Aliases:      []string{"s"},
+			Usage:        "saves a docker volume as a tarball",
+			ArgsUsage:    "[volume-name] [tar-name] [path-to-save]",
+			Action:       save,
+			BashComplete: saveComplete,
+		},
+		{
+			Name:    "kill",
+			Aliases: []string{"k"},
+			Usage:   "kills all running containers",
+			Action:  kill,
+		},
+		{
+			Name:   "stop",
+			Usage:  "stop all running containers",
+			Action: stop,
+		},
+		{
+			Name:    "remove",
+			Aliases: []string{"rma"},
+			Usage:   "remove all containers",
+			Action:  remove,
+		},
+		{
+			Name: "deploy",
+			Flags: []cli.Flag{
+				&cli.BoolFlag{
+					Name:    "auto",
+					Aliases: []string{"a"},
+					Usage:   "Automatically initialize swarm if not in swarm",
+				},
+				&cli.BoolFlag{
+					Name:    "unsafe",
+					Aliases: []string{"u"},
+					Usage:   "Restart the swarm forcefully if deploy fails to try again",
+				},
+			},
+			ArgsUsage:    "[stack-name] [stack-file(omit if stack.yml or docker-compose.yml present)]",
+			Usage:        "Deploys an extended docker-compose file with images",
+			Action:       deploy,
+			BashComplete: deployComplete,
+		},
+		{
+			Name:      "run",
+			Aliases:   []string{"r"},
+			ArgsUsage: "[image-name] [container-name(default:random)] [context(default:.)] [dockerfile(default:Dockerfile)]",
+			Usage:     "builds and runs the image immediately",
+			Action:    run,
+		},
+		{
+			Name:      "image",
+			Aliases:   []string{"img"},
+			ArgsUsage: "[<key>=<value>] [<key>=<value>]....",
+			Usage:     "get a list of images",
+			Action:    image,
+		},
+		{
+			Name:    "remove-image",
+			Aliases: []string{"rmi"},
+			Flags: []cli.Flag{
+				&cli.BoolFlag{
+					Name:    "force",
+					Aliases: []string{},
+					Usage:   "do not prompt confirmation",
+				},
+			},
+			ArgsUsage: "[<key>=<value>] [<key>=<value>]....",
+			Usage:     "remove the list of images",
+			Action:    rmi,
+		},
+		{
+			Name:      "d",
+			ArgsUsage: "[any docker command]",
+			Usage:     "docker alias",
 			Action: func(c *cli.Context) error {
-				l := len(c.Args())
-				var volume string
-				tarName := "data"
-				path := "./"
-				if l == 0 {
-					return errors.New("need at least 1 arguments")
+				err := n.Cmd.Create("docker", c.Args().Slice()...).Run()
+				if len(err) > 0 {
+					return errors.New(strings.Join(err, "\n"))
 				}
-				if l > 0 {
-					volume = c.Args()[0]
-				}
-				if l > 1 {
-					tarName = c.Args()[1]
-				}
-				if l > 2 {
-					path = c.Args()[2]
-				}
-				n.Save(volume, tarName, path)
 				return nil
 			},
 		},
+		{
+			Name:    "volume",
+			Aliases: []string{"v"},
+			Usage:   "manage volumes",
+			Subcommands: []*cli.Command{
+				{
+					Name:         "Create",
+					Aliases:      []string{"c"},
+					Usage:        "create volumes",
+					Action:       volumeCreate,
+					BashComplete: volumeCreateComplete,
+				},
+				{
+					Name:    "Remove",
+					Aliases: []string{"r"},
+					Usage:   "remove volumes",
+					Flags: []cli.Flag{
+						&cli.BoolFlag{
+							Name:    "force",
+							Aliases: []string{"f"},
+							Usage:   "Force the removal of one or more volumes",
+						},
+					},
+					Action:       volumeRemove,
+					BashComplete: volumeRemoveComplete,
+				},
+			},
+		},
 	}
-
+	app.EnableBashCompletion = true
 	app.Name = "Narwhal"
-	app.Description = "A command line interface that allows you to load and save docker volumes as tarballs"
-	app.Version = "0.1.0"
-	app.Usage = "A docker volume helper"
+	app.Description = "A docker utility CLI that allows you to save time"
+	app.Version = "0.2.0"
+	app.Usage = "Docker utilities"
 	app.Compiled = time.Now()
-	app.Authors = []cli.Author{
+	app.Authors = []*cli.Author{
 		{
 			Name:  "Kirinnee",
 			Email: "kirinnee97@gmail.com",

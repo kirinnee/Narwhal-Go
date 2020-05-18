@@ -1,6 +1,9 @@
 # Narwhal Go 
 
-A Go CLI that allows users to load and save docker volumes as tarball
+A Docker Utility CLI that contains command to help with you development.
+
+This tool contains dangerous commands and we do not recommend you to install
+on production
 
 # Installation
 Narwhal is available as to install in various platforms
@@ -11,10 +14,99 @@ sudo add-apt-repository ppa:kirinnee/main
 sudo apt-get update
 sudo apt-get install narwhal
 ```
+or if `narhwal` is too long, to install as nw:
+
+Bash:
+```bash
+echo "alias nw='narwhal'" >> ~/.bash_aliases
+source ~/.bashrc
+```
+
+Zsh:
+```bash
+echo "alias d='docker'" >> ~/.zshrc
+source ~/.zshrc
+```
+
 
 ### Go installation
-```bash
+```shell
 go install gitlab.com/kiringo/narwhal 
+```
+or if `narhwal` is too long, to install as nw:
+```shell
+go build -i -o nw gitlab.com/kiringo/narwhal
+```
+
+### Enabling Auto completion for your productivity!
+Power Shell:
+```powershell
+narwhal setup powershell $profile
+& $profile
+```
+
+Bash:
+```bash
+narwhal setup bash
+source ~/.bashrc
+```
+
+Zsh:
+```bash
+narwhal setup zsh
+source ~/.zshrc
+```
+
+### Disabling Auto Completion
+Power Shell:
+```powershell
+narwhal td powershell $profile
+```
+
+Bash:
+```bash
+narwhal td bash
+```
+
+Zsh:
+```bash
+narwhal td zsh
+```
+
+
+### Adding `nw` Alias for you productivity!
+Power Shell:
+```powershell
+narwhal alias add powershell $profile
+& $profile
+```
+
+Bash:
+```bash
+narwhal alias add bash
+source ~/.bashrc
+```
+
+Zsh:
+```bash
+narwhal alias add zsh
+source ~/.bashrc
+```
+
+### Remove `nw` Alias
+Power Shell:
+```powershell
+nw alias remove powershell $profile
+```
+
+Bash:
+```bash
+nw alias remove bash
+```
+
+Zsh:
+```bash
+nw alias remove zsh
 ```
 
 ### Other installations
@@ -22,10 +114,15 @@ go install gitlab.com/kiringo/narwhal
 
 
 # Usage
-## Saving
+## volumes 
+Some basic volume commands
+
+### Saving
 Saving docker volumes to tarball
 ```bash
 narwhal save <volume> <tarball name> <path to save>
+# or 
+nw save <volume> <tarball name> <path to save>
 ```
 | var  | description  |
 |---|---|
@@ -33,19 +130,431 @@ narwhal save <volume> <tarball name> <path to save>
 | tarball name | the file name of the tarball. if `group` is given, the tarball generated will be `group.tar.gz`. Optional. Default:`data` | 
 | path to save | the path to save the tarball on host to. relative to terminal directory. Optional. Default: `./`
 
-## Loading
+### Loading
 Loading a tarball to a docker volume.
 Do note that if the volume have files, the will overwrite files with same path and name.
 
 ```bash
 narwhal load <path to tarball> <volume>
+# or
+nw load <path to tarball> <volume>
 ```
 | var  | description  |
 |---|---|
 | path to tarball | The path to the tarball to load on the host machine, relative to the terminal's directory. |
 | volume | the name of a docker named volume|
 
+### Creating
+Create a volume, exactly same as `docker` cli. You can use all options available in `docker`
 
+```bash
+narwhal volume create <volume-name> [opts]
+# or
+nw v c <volume-name> [opts]
+```
+
+### Removing
+removing a volume, exactly same as `docker` cli. You can use all options available in `docker`
+
+```bash
+narwhal volume remove <volume-name> [opts]
+# or
+nw vr <volume-name> [opts]
+```
+
+## Containers
+Some basic container commands
+
+### Kill 
+Kill all running containers
+```bash
+narwhal kill
+# or
+nw k
+```
+
+### Stop
+Stop all running containers
+```bash
+narwhal stop
+# or
+nw stop
+```
+
+### Remove
+Remove all running containers
+```bash
+narwhal remove
+# or
+nw rma
+```
+
+### Run
+Immediate build an image, tag it, and run it:
+```bash
+narwhal run <image-name> <container-name> <context> <dockerfile>
+# or 
+nw r <image-name> <container-name> <context> <dockerfile>
+```
+| var  | description  |
+|---|---|
+| image-name | name of the image to build first, before running|
+| container-name| name of the container. use `""` for random name. Optional. Default: `""` | 
+| context | context of docker build. Optional. Default: `.` |
+| dockerfile | dockerfile for docker build. Optional. Default: "Dockerfile" |
+
+### Image
+List the image. Has same options as `docker` except for `filter` .`filter` is not a flag but  
+argument now. 
+
+For the list of filters, look at [filtering](#Filtering).
+```bash
+narwhal image <filters>... [opts]
+# or
+nw img <filters>... [opts]
+```
+
+Example:
+```bash
+narwhal image "ref=alpine/*" "before=24h" --format "{{.Repository}}"
+# or 
+nw img "ref=alpine/*" "before=24h" -f "{{.Repository}}"
+```
+
+
+### Remove Image
+Remove images with a `filter`s
+
+For the list of filters, look at [filtering](#Filtering).
+```bash
+narwhal remove-image <filters>...
+# or
+nw rmi <filters>... 
+```
+
+Example:
+```bash
+narwhal remove-image "ref=alpine/*" "before=24h" 
+# or 
+nw rmi "ref=alpine/*" "before=24h" 
+```
+## Swarm
+Simplify swarm deployment, allowing on-site image building like good-old docker-compose.
+
+For image build, reference [the images section](#Compose)
+```bash
+narwhal deploy [opts] <stack-name> <compose-file>
+```
+| var  | description  |
+|---|---|
+| `--auto` or `-a` | automatically intialize a swarm if not in swarm mode |
+|`--unsafe` or `-u` | if deploy attempt  fails, leave the swarm, enter the swarm and try again. Requires `-a` flag to  enabled. Shorthand with `-au`| 
+| stack-name | name of the stack to deploy |
+| compose-file | name of the compose file to deploy. Can be omitted if your compose file is either `docker-compose.yml` or `stack.yml` |
+
+
+
+# Filtering
+
+There are a few filter methods, all of which comes in the `<key>=<value>` format.
+
+Filter works like the && operator, where images must fulfill **ALL** of the filters
+applied
+
+## Reference
+`ref=` or `reference=` 
+
+You can use this filter multiple times
+
+This can filter images based on their image name and tag. Wildcards apply:
+
+Images:
+```
+narwhal/a:0
+narwhal/a:1
+narwhal/b:0
+narwhal/b:1
+docker:latest
+```
+Examples:
+```
+ref=narwhal/* => narwhal/a:0,  narwhal/a:1,  narwhal/b:0,  narwhal/b:1,    
+ref=docker* => docker
+ref=narwhal/a:* => narwhal/a:0, narwhal/a:1
+ref=narwhal/*:0 => narwhal/a:0, narwhal/b:0
+```
+
+## Label
+`label=`
+
+You can only use this filter once
+
+This can filter images based on the present of the label, or the label with the exact 
+value
+
+Examples:
+```
+label=a  => all image with the label with key 'a'
+label=b=5 => all images with the label 'b=5'
+```
+
+## Dangling
+`dangling=`
+You can use this filter once
+
+This filter where the image is dangling
+
+Examples:
+```
+dangling=true
+```
+
+## Time
+`before=` and `after=` and `from= to=`
+
+You can use this filter multiple times
+
+Filter does a time query
+
+### Type
+There are a few types of time queries
+
+#### Before
+It will pick images that is before the time specified
+
+Examples:
+```yaml
+# before the day 2020/02/05
+before=2020/02/05 
+
+# before 24h ago
+before=24h  
+
+# before the time of the specified image (alpine:latest) is created
+before=alpine:latest 
+```
+
+#### After
+It will pick images that is after the time specified
+
+Examples:
+```yaml
+# after the day 2020/02/05
+after=2020/02/05 
+
+# everything is the last 24h 
+after=24h 
+
+# after the time of the specified image (alpine:latest) is created
+after=alpine:latest 
+```
+
+#### From-To
+It will pick images between the two times specified
+Examples:
+```yaml
+# from the day 2020/02/05 to 24h ago 
+"from=2020/02/05 to=24h"
+
+# from 24 hour 30min 20s ago too the time where the image 'alpine latest' is created
+"from=24h30m20s to=alpine:latest 
+```
+### Time Format
+Time can come in many form, relative, absolute or based on images
+
+#### Relative time
+You can specify time relative to the current time. 
+
+|short hand | reference |
+|---|---|
+|`h`|hour|
+|`m`|minute|
+|`s`|second|
+|`ms`|millisecond|
+|`us`| microsecond|
+|`ns`|nanosecond|
+
+Examples
+```yaml
+# Before 2 hours 20s ago
+before=2h20s
+
+# The past 2 min 50 microsecond and 60 nano seconds
+after=2m50us60ns
+
+# From 2days ago to yesterday
+from=48h to=24h
+```
+
+#### Image-based Time
+This allows you to use the reference the time of the image is 
+created at
+
+```yaml
+# The image 
+# server:0.1 created at 1 June 2020
+# server:1.0 created at 10 June 2020
+
+# before 1st June 2020
+before=server:0.1
+
+# after 10th June 2020
+after=server:1.0
+```
+
+#### Absolute time format
+There are multiple formats of this time, but do note if you 
+do not provide the timezone, it will try to use your system's 
+time zone. 
+
+Format of dates are in `mm/dd`, never the other way round. 
+
+Accepted formats:
+
+```yaml
+May 8, 2009 5:57:51 PM
+oct 7, 1970
+oct 7, '70
+oct. 7, 1970
+oct. 7, 70
+Mon Jan  2 15:04:05 2006
+Mon Jan  2 15:04:05 MST 2006
+Mon Jan 02 15:04:05 -0700 2006
+Monday, 02-Jan-06 15:04:05 MST
+Mon, 02 Jan 2006 15:04:05 MST
+Tue, 11 Jul 2017 16:28:13 +0200 (CEST)
+Mon, 02 Jan 2006 15:04:05 -0700
+Thu, 4 Jan 2018 17:53:36 +0000
+Mon Aug 10 15:44:11 UTC+0100 2015
+Fri Jul 03 2015 18:04:07 GMT+0100 (GMT Daylight Time)
+September 17, 2012 10:09am
+September 17, 2012 at 10:09am PST-08
+September 17, 2012, 10:10:09
+October 7, 1970
+October 7th, 1970
+12 Feb 2006, 19:17
+12 Feb 2006 19:17
+7 oct 70
+7 oct 1970
+03 February 2013
+1 July 2013
+2013-Feb-03
+ 
+#  mm/dd/yy
+3/31/2014
+03/31/2014
+08/21/71
+8/1/71
+4/8/2014 22:05
+04/08/2014 22:05
+4/8/14 22:05
+04/2/2014 03:00:51
+8/8/1965 12:00:00 AM
+8/8/1965 01:00:01 PM
+8/8/1965 01:00 PM
+8/8/1965 1:00 PM
+8/8/1965 12:00 AM
+4/02/2014 03:00:51
+03/19/2012 10:11:59
+03/19/2012 10:11:59.3186369
+
+# yyyy/mm/dd
+2014/3/31
+2014/03/31
+2014/4/8 22:05
+2014/04/08 22:05
+2014/04/2 03:00:51
+2014/4/02 03:00:51
+2012/03/19 10:11:59
+2012/03/19 10:11:59.3186369
+
+# Chinese
+2014年04月08日
+
+#   yyyy-mm-ddThh
+2006-01-02T15:04:05+0000
+2009-08-12T22:15:09-07:00
+2009-08-12T22:15:09
+2009-08-12T22:15:09Z
+
+#  yyyy-mm-dd hh:mm:ss
+2014-04-26 17:24:37.3186369
+2012-08-03 18:31:59.257000000
+2014-04-26 17:24:37.123
+2013-04-01 22:43
+2013-04-01 22:43:22
+2014-12-16 06:20:00 UTC
+2014-12-16 06:20:00 GMT
+2014-04-26 05:24:37 PM
+2014-04-26 13:13:43 +0800
+2014-04-26 13:13:43 +0800 +08
+2014-04-26 13:13:44 +09:00
+2012-08-03 18:31:59.257000000 +0000 UTC
+2015-09-30 18:48:56.35272715 +0000 UTC
+2015-02-18 00:12:00 +0000 GMT
+2015-02-18 00:12:00 +0000 UTC
+2015-02-08 03:02:00 +0300 MSK m=+0.000000001
+2015-02-08 03:02:00.001 +0300 MSK m=+0.000000001
+2017-07-19 03:21:51+00:00
+2014-04-26
+2014-04
+2014
+2014-05-11 08:20:13,787
+
+# mm.dd.yy
+3.31.2014
+03.31.2014
+08.21.71
+2014.03
+2014.03.30
+
+# yyyymmdd and similar
+20140601
+20140722105203
+# unix seconds, ms, micro, nano
+1332151919
+1384216367189
+1384216367111222
+1384216367111222333
+```
+
+# Compose
+The compose file narwhal supports has an addition `image` seciton, which allows you
+to reference how to build images: 
+
+```yaml
+version: '3.8'
+
+services:
+  webapp:
+    image: rocket:latest
+    ports:
+      - 8000:8000
+    deploy:
+      replicas: 3
+
+# images, you can add as many as you need
+images:
+
+  # This builds at 'rocket' folder and uses 'rocket/df' as the Dockerfile 
+  rocket:latest: 
+    context: rocket 
+    file: df 
+
+  # This builds at 'golang' folder and uses 'golang/Dockerfile' as the Dockerfile
+  golang:latest: 
+    context: golang
+
+  # This builds at '.' folder and uses './dfile' as the Dockerfile
+  node:latest: 
+    file: dfile
+  
+  # This builds at 'dotnet' folder and uses 'dotnet/Dockerfile' as the Dockerfile
+  dotnet:latest: dotnet 
+  
+  # This builds at '.' folder and uses './Dockerfile' as the Dockerfile
+  ror:latest:
+```
 
 ## Contributing
 Please read [CONTRIBUTING.md](CONTRIBUTING.MD) for details on our code of conduct, and the process for submitting pull requests to us.

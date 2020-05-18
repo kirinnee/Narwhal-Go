@@ -11,8 +11,8 @@ variables:
   BINARY_NAME: narwhal
   FOLDER: ${BINARY_NAME}-${CI_COMMIT_TAG}
   SECTION: utils
-  DESC_SHORT: Command line utility to load and save docker volumes as tarball
-  DESC_LONG: A go-based CLI to help load and save named docker volumes as tarballs
+  DESC_SHORT: Docker command line utility
+  DESC_LONG: Go-based CLI tha help withs common Docker actions, including saving and loading volumes
   TARGET_PPA: kirinnee/main
 
 Build:
