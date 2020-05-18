@@ -1,12 +1,10 @@
 package main
 
 import (
-	"errors"
 	"github.com/urfave/cli/v2"
 	"gitlab.com/kiringo/narwhal_lib"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -137,18 +135,6 @@ func main() {
 			Action:    rmi,
 		},
 		{
-			Name:      "d",
-			ArgsUsage: "[any docker command]",
-			Usage:     "docker alias",
-			Action: func(c *cli.Context) error {
-				err := n.Cmd.Create("docker", c.Args().Slice()...).Run()
-				if len(err) > 0 {
-					return errors.New(strings.Join(err, "\n"))
-				}
-				return nil
-			},
-		},
-		{
 			Name:    "volume",
 			Aliases: []string{"v"},
 			Usage:   "manage volumes",
@@ -180,7 +166,7 @@ func main() {
 	app.EnableBashCompletion = true
 	app.Name = "Narwhal"
 	app.Description = "A docker utility CLI that allows you to save time"
-	app.Version = "0.2.0"
+	app.Version = "0.2.1"
 	app.Usage = "Docker utilities"
 	app.Compiled = time.Now()
 	app.Authors = []*cli.Author{
