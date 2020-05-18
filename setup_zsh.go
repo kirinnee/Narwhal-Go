@@ -29,11 +29,13 @@ _cli_zsh_autocomplete() {
 
 compdef _cli_zsh_autocomplete $PROG`
 
-const ZSH_RC = `PROG=narwhal
+const ZSH_RC = `
+PROG=narwhal
 _CLI_ZSH_AUTOCOMPLETE_HACK=1
 source  ~/.narwhalrc
 PROG=nw
-source  ~/.narwhalrc`
+source  ~/.narwhalrc
+`
 
 func setupZSH() error {
 	err := write(".narwhalrc", BASH, true)
