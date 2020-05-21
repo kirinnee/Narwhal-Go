@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 )
 
-func deploy(c *cli.Context) error {
-
+func stopStack(c *cli.Context) error {
 	app := c.String("name")
+	auto := c.Bool("auto")
 	stack := c.Args().Get(0)
 
 	if stack == "" {
@@ -31,26 +31,14 @@ func deploy(c *cli.Context) error {
 			}
 		}
 	}
-	if stack == "" {
-		return e1("cannot find docker-compose file")
+	err := n.StopStack(app, stack)
+	if len(err) > 0 {
+		return e(err)
 	}
 
-	auto, unsafe := c.Bool("auto"), c.Bool("unsafe")
-
-	if !auto && unsafe {
-		return e1("you have to use --auto if you want to use --unsafe")
-	}
 	if auto {
-		err := n.DeployAuto(app, stack, unsafe)
-
-		if len(err) > 0 {
-			return e(err)
-		}
-	} else {
-		err := n.Deploy(app, stack)
-		if len(err) > 0 {
-			return e(err)
-		}
+		return e(n.Cmd.Create("docker", "swarm", "leave", "--force").Run())
 	}
 	return nil
+
 }

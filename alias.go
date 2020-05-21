@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/urfave/cli/v2"
 )
@@ -15,21 +14,21 @@ func removeAlias(c *cli.Context) error {
 	if shell == "bash" {
 		f, err := homeFile(".bashrc")
 		if err != nil {
-			return err
+			return ee(err)
 		}
 		return removeFromFile(f, BASH_ALIAS)
 
 	} else if shell == "zsh" {
 		f, err := homeFile(".zshrc")
 		if err != nil {
-			return err
+			return ee(err)
 		}
 		return removeFromFile(f, ZSH_ALIAS)
 	} else if shell == "powershell" {
 		profile := c.Args().Get(1)
 		return removeFromFile(profile, POWERSHELL_ALIAS)
 	} else {
-		return errors.New("unknown command")
+		return e1("unknown command")
 	}
 
 }
@@ -69,7 +68,7 @@ func addAlias(c *cli.Context) error {
 		fmt.Println("\t& $profile")
 		return nil
 	} else {
-		return errors.New("unknown command")
+		return e1("unknown command")
 	}
 
 }

@@ -36,28 +36,28 @@ func teardown(c *cli.Context) error {
 
 func setup(c *cli.Context) error {
 	if c.NArg() != 1 && c.NArg() != 2 {
-		return errors.New("only have 1 or 2 arguments, either 'bash', 'zsh', 'powershell $PROFILE")
+		return e1("only have 1 or 2 arguments, either 'bash', 'zsh', 'powershell $PROFILE")
 	}
 	t := c.Args().Get(0)
 
 	if t == "bash" {
 		if c.NArg() != 1 {
-			return errors.New("'setup bash' has no other arguments")
+			return e1("'setup bash' has no other arguments")
 		}
 		return setupBash()
 	} else if t == "zsh" {
 		if c.NArg() != 1 {
-			return errors.New("'setup zsh' has no other arguments")
+			return e1("'setup zsh' has no other arguments")
 		}
 		return setupZSH()
 	} else if t == "powershell" {
 		if c.NArg() != 2 {
-			return errors.New("'setup zsh $profile' has no other arguments")
+			return e1("'setup zsh $profile' has no other arguments")
 		}
 		profile := c.Args().Get(1)
 		return setupPowerShell(profile)
 	} else {
-		return errors.New("only have 1 argument, either 'bash' or 'zsh'")
+		return e1("only have 1 argument, either 'bash' or 'zsh'")
 	}
 }
 

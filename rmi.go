@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	_ "github.com/olekukonko/tablewriter"
@@ -16,10 +15,10 @@ func rmi(c *cli.Context) error {
 	if !force {
 		images, remain, errs := n.Images(filters...)
 		if len(remain) > 0 {
-			return errors.New("unknown filters: " + strings.Join(remain, ", "))
+			return e1("unknown filters: " + strings.Join(remain, ", "))
 		}
 		if len(errs) > 0 {
-			return errors.New(strings.Join(errs, "\n"))
+			return e(errs)
 		}
 		fmt.Println("These will be the images that are removed: ")
 
@@ -33,7 +32,7 @@ func rmi(c *cli.Context) error {
 		var input string
 		_, err := fmt.Scanln(&input)
 		if err != nil {
-			return err
+			return ee(err)
 		}
 		if input == "y" || input == "Y" {
 
@@ -44,7 +43,7 @@ func rmi(c *cli.Context) error {
 
 	err := n.RemoveImage(filters...)
 	if len(err) > 0 {
-		return errors.New(strings.Join(err, "\n"))
+		return e(err)
 	}
 	return nil
 }

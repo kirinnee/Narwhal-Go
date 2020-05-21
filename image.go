@@ -1,9 +1,7 @@
 package main
 
 import (
-	"errors"
 	"github.com/urfave/cli/v2"
-	"strings"
 )
 
 func image(c *cli.Context) error {
@@ -11,7 +9,7 @@ func image(c *cli.Context) error {
 
 	images, remain, errs := n.Images(filters...)
 	if len(errs) > 0 {
-		return errors.New(strings.Join(errs, "\n"))
+		return e(errs)
 	}
 
 	args := []string{
@@ -28,7 +26,7 @@ func image(c *cli.Context) error {
 
 	err := n.Cmd.Create("docker", args...).Run()
 	if len(err) > 0 {
-		return errors.New(strings.Join(err, "\n"))
+		return e(err)
 	}
 	return nil
 

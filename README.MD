@@ -230,16 +230,31 @@ nw rmi "ref=alpine/*" "before=24h"
 Simplify swarm deployment, allowing on-site image building like good-old docker-compose.
 
 For image build, reference [the images section](#Compose)
+
+### Deploy
 ```bash
-narwhal deploy [opts] <stack-name> <compose-file>
+narwhal deploy [opts] <compose-file>
+or 
+nw up [opts] <compose-file> 
 ```
 | var  | description  |
 |---|---|
 | `--auto` or `-a` | automatically intialize a swarm if not in swarm mode |
-|`--unsafe` or `-u` | if deploy attempt  fails, leave the swarm, enter the swarm and try again. Requires `-a` flag to  enabled. Shorthand with `-au`| 
-| stack-name | name of the stack to deploy |
+|`--unsafe` or `-u` | if deploy attempt  fails, leave the swarm, enter the swarm and try again. Requires `-a` flag to  enabled. Shorthand with `-au`|
+| `--name` or `-n` | overrides the stack name to be deployed, or provide stack name if the `compose` file does not provide it | 
 | compose-file | name of the compose file to deploy. Can be omitted if your compose file is either `docker-compose.yml` or `stack.yml` |
 
+### Un-deploy
+```bash
+narwhal undeploy [opts] <compose-file>
+or 
+nw down [opts] <compose-file> 
+```
+| var  | description  |
+|---|---|
+| `--auto` or `-a` | automatically intialize forcefully leave the swarm after the stack goes down |
+| `--name` or `-n` | overrides the stack name to be removed, or provide stack name if the `compose` file does not provide it | 
+| compose-file | name of the compose file to deploy. Can be omitted if your compose file is either `docker-compose.yml` or `stack.yml` |
 
 
 # Filtering
@@ -508,10 +523,13 @@ October 7th, 1970
 
 # Compose
 The compose file narwhal supports has an addition `image` seciton, which allows you
-to reference how to build images: 
+to reference how to build image, and addtional `stack` property which allows you to
+start docker-swarm stacks and stop stacks without specifying the name: 
 
 ```yaml
 version: '3.8'
+
+stack: my_stack # this defines the stack name if you the file
 
 services:
   webapp:

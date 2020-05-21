@@ -90,7 +90,8 @@ func main() {
 			Action:  remove,
 		},
 		{
-			Name: "deploy",
+			Name:    "deploy",
+			Aliases: []string{"up"},
 			Flags: []cli.Flag{
 				&cli.BoolFlag{
 					Name:    "auto",
@@ -102,11 +103,15 @@ func main() {
 					Aliases: []string{"u"},
 					Usage:   "Restart the swarm forcefully if deploy fails to try again",
 				},
+				&cli.StringFlag{
+					Name:    "name",
+					Aliases: []string{"n"},
+					Usage:   "stack name to remove",
+				},
 			},
-			ArgsUsage:    "[stack-name] [stack-file(omit if stack.yml or docker-compose.yml present)]",
-			Usage:        "Deploys an extended docker-compose file with images",
-			Action:       deploy,
-			BashComplete: deployComplete,
+			ArgsUsage: "[stack-file(omit if stack.yml or docker-compose.yml present)]",
+			Usage:     "Deploys an extended docker-compose file with images",
+			Action:    deploy,
 		},
 		{
 			Name:      "run",
@@ -137,10 +142,23 @@ func main() {
 			Action:    rmi,
 		},
 		{
-			Name: "test",
-			Action: func(context *cli.Context) error {
-				return e([]string{"a", "b", "c"})
+			Name:    "undeploy",
+			Aliases: []string{"down"},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "name",
+					Aliases: []string{"n"},
+					Usage:   "stack name to remove",
+				},
+				&cli.BoolFlag{
+					Name:    "auto",
+					Aliases: []string{"a"},
+					Usage:   "automatically leaves the swarm by force",
+				},
 			},
+			ArgsUsage: "[stack-file(omit if stack.yml or docker-compose.yml present)]",
+			Usage:     "remove the list of images",
+			Action:    stopStack,
 		},
 		{
 			Name:    "volume",
@@ -175,7 +193,7 @@ func main() {
 	app.EnableBashCompletion = true
 	app.Name = "Narwhal"
 	app.Description = "A docker utility CLI that allows you to save time"
-	app.Version = "0.2.4"
+	app.Version = "0.2.8"
 	app.Usage = "Docker utilities"
 	app.Compiled = time.Now()
 	app.Authors = []*cli.Author{
@@ -217,4 +235,12 @@ func e(s []string) error {
 	}
 
 	return cli.Exit("", 1)
+}
+
+func e1(s string) error {
+	return e([]string{s})
+}
+
+func ee(err error) error {
+	return e1(err.Error())
 }

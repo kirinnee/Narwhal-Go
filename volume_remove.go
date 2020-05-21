@@ -1,10 +1,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/urfave/cli/v2"
-	"strings"
 )
 
 func volumeRemove(c *cli.Context) error {
@@ -18,7 +16,7 @@ func volumeRemove(c *cli.Context) error {
 	}
 	err := n.Cmd.Create("docker", args...).Run()
 	if len(err) > 0 {
-		return errors.New(strings.Join(err, "\n"))
+		return e(err)
 	}
 	return nil
 }

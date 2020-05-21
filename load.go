@@ -1,14 +1,13 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/urfave/cli/v2"
 )
 
 func load(c *cli.Context) error {
 	if c.NArg() < 2 {
-		return errors.New("need at least 2 arguments")
+		return e1("need at least 2 arguments")
 	} else {
 		n.Load(c.Args().Get(1), c.Args().Get(0))
 		return nil

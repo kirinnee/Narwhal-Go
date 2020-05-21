@@ -1,11 +1,9 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	ng "github.com/goombaio/namegenerator"
 	"github.com/urfave/cli/v2"
-	"strings"
 	"time"
 )
 
@@ -14,7 +12,7 @@ func run(c *cli.Context) error {
 	image, name, context, file := a.Get(0), a.Get(1), a.Get(2), a.Get(3)
 
 	if image == "" {
-		return errors.New("please enter an image name")
+		return e1("please enter an image name")
 	}
 	if context == "" {
 		context = "."
@@ -25,7 +23,7 @@ func run(c *cli.Context) error {
 
 	err := n.Run(context, file, image, name)
 	if len(err) > 0 {
-		return errors.New(strings.Join(err, "\n"))
+		return e(err)
 	}
 	return nil
 

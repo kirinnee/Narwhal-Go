@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/urfave/cli/v2"
 )
@@ -12,7 +11,7 @@ func save(c *cli.Context) error {
 	tarName := "data"
 	path := "./"
 	if l == 0 {
-		return errors.New("need at least 1 arguments")
+		return e1("need at least 1 arguments")
 	}
 	if l > 0 {
 		volume = c.Args().Get(0)
