@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 	"gitlab.com/kiringo/narwhal_lib"
 	"log"
@@ -135,6 +137,12 @@ func main() {
 			Action:    rmi,
 		},
 		{
+			Name: "test",
+			Action: func(context *cli.Context) error {
+				return e([]string{"a", "b", "c"})
+			},
+		},
+		{
 			Name:    "volume",
 			Aliases: []string{"v"},
 			Usage:   "manage volumes",
@@ -163,10 +171,11 @@ func main() {
 			},
 		},
 	}
+	app.UseShortOptionHandling = true
 	app.EnableBashCompletion = true
 	app.Name = "Narwhal"
 	app.Description = "A docker utility CLI that allows you to save time"
-	app.Version = "0.2.3"
+	app.Version = "0.2.4"
 	app.Usage = "Docker utilities"
 	app.Compiled = time.Now()
 	app.Authors = []*cli.Author{
@@ -200,4 +209,12 @@ COPYRIGHT:
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func e(s []string) error {
+	for _, v := range s {
+		_, _ = fmt.Fprintf(color.Output, color.RedString(v)+"\n")
+	}
+
+	return cli.Exit("", 1)
 }
