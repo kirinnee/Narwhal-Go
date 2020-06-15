@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/fatih/color"
+	ng "github.com/goombaio/namegenerator"
 	"github.com/urfave/cli/v2"
 	"gitlab.com/kiringo/narwhal_lib"
 	"log"
+	"math/rand"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -114,9 +117,31 @@ func main() {
 			Action:    deploy,
 		},
 		{
-			Name:      "run",
+			Name: "run",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "context",
+					Aliases: []string{"c"},
+					Usage:   "context folder of the docker build. Default: .",
+				},
+				&cli.StringFlag{
+					Name:    "file",
+					Aliases: []string{"f"},
+					Usage:   "Dockerfile to use relative to the context. Default: Dockerfile",
+				},
+				&cli.StringFlag{
+					Name:    "name",
+					Aliases: []string{"n"},
+					Usage:   "Name of the container created. Default: docker-daemon random generation",
+				},
+				&cli.StringFlag{
+					Name:    "image",
+					Aliases: []string{"i"},
+					Usage:   "image name created. Default: random generation",
+				},
+			},
 			Aliases:   []string{"r"},
-			ArgsUsage: "[image-name] [container-name(default:random)] [context(default:.)] [dockerfile(default:Dockerfile)]",
+			ArgsUsage: "[command(default: Dockerfile definition)] [addition docker flags....]",
 			Usage:     "builds and runs the image immediately",
 			Action:    run,
 		},
@@ -126,6 +151,55 @@ func main() {
 			ArgsUsage: "[<key>=<value>] [<key>=<value>]....",
 			Usage:     "get a list of images",
 			Action:    image,
+		},
+		{
+			Name:    "copy",
+			Aliases: []string{"cp"},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "file",
+					Aliases: []string{"f"},
+					Usage:   "dockerfile name to use, relative to context. Default: Dockerfile",
+				},
+				&cli.StringFlag{
+					Name:    "context",
+					Aliases: []string{"c"},
+					Usage:   "docker context to use. Default: .",
+				},
+			},
+			ArgsUsage: "[file from container] [file to host] [command to execute(default:sh)]",
+			Usage:     "copy a file out of a static image after executing a command",
+			Action: func(ctx *cli.Context) error {
+				seed := time.Now().UTC().UnixNano()
+				ng := ng.NewNameGenerator(seed)
+				s1 := rand.NewSource(seed)
+				r := rand.New(s1)
+
+				from, to, cmd, context, file := ctx.Args().Get(0), ctx.Args().Get(1), ctx.Args().Get(2), ctx.String("context"), ctx.String("file")
+				if from == "" {
+					return e1("please enter file to copy from")
+				}
+				if to == "" {
+					return e1("please enter file to copy to")
+				}
+				if cmd == "" {
+					cmd = "sh"
+				}
+				if context == "" {
+					context = "."
+				}
+				if file == "" {
+					file = "."
+				}
+				image := ng.Generate() + ":" + strconv.Itoa(r.Int()) + "-" + strconv.Itoa(r.Int()) + "-" + strconv.Itoa(r.Int())
+
+				err := n.MoveOut(context, file, image, from, to, cmd)
+				if len(err) > 0 {
+					return e(err)
+				}
+				return nil
+
+			},
 		},
 		{
 			Name:    "remove-image",
@@ -193,7 +267,7 @@ func main() {
 	app.EnableBashCompletion = true
 	app.Name = "Narwhal"
 	app.Description = "A docker utility CLI that allows you to save time"
-	app.Version = "0.3.0"
+	app.Version = "0.3.0r3"
 	app.Usage = "Docker utilities"
 	app.Compiled = time.Now()
 	app.Authors = []*cli.Author{

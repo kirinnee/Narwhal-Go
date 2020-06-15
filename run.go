@@ -9,10 +9,12 @@ import (
 
 func run(c *cli.Context) error {
 	a := c.Args()
-	image, name, context, file := a.Get(0), a.Get(1), a.Get(2), a.Get(3)
+	image, name, context, file, cmd, rest := c.String("image"), c.String("name"), c.String("context"), c.String("file"), a.First(), a.Tail()
 
 	if image == "" {
-		return e1("please enter an image name")
+		seed := time.Now().UTC().UnixNano()
+		ng := ng.NewNameGenerator(seed)
+		image = ng.Generate()
 	}
 	if context == "" {
 		context = "."
@@ -20,8 +22,11 @@ func run(c *cli.Context) error {
 	if file == "" {
 		file = "Dockerfile"
 	}
+	if cmd == "-" {
+		cmd = ""
+	}
 
-	err := n.Run(context, file, image, name)
+	err := n.Run(context, file, image, name, cmd, rest)
 	if len(err) > 0 {
 		return e(err)
 	}
