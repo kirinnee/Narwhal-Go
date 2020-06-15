@@ -71,6 +71,8 @@ gitlab.com/kiringo/narwhal_lib v0.0.0-20200615121630-706d5d93acd3 h1:BFrdDFullz/
 gitlab.com/kiringo/narwhal_lib v0.0.0-20200615121630-706d5d93acd3/go.mod h1:GaXIsDCSt9HwJPpI9h48QYzbR/9fBefkCUTR9KJ5y/I=
 gitlab.com/kiringo/narwhal_lib v0.0.0-20200615140115-a0c03c8e287c h1:2Mbg9mPrlbFo6Sq/Wr+NFqAzKYgbTnlF0JAlR8ZPIKQ=
 gitlab.com/kiringo/narwhal_lib v0.0.0-20200615140115-a0c03c8e287c/go.mod h1:GaXIsDCSt9HwJPpI9h48QYzbR/9fBefkCUTR9KJ5y/I=
+gitlab.com/kiringo/narwhal_lib v0.0.0-20200615162541-94c9a6cad165 h1:kkDJNdUFzFNFp8+C+OeUdsYOFMaTGE4i3KZuCbJ2gwg=
+gitlab.com/kiringo/narwhal_lib v0.0.0-20200615162541-94c9a6cad165/go.mod h1:GaXIsDCSt9HwJPpI9h48QYzbR/9fBefkCUTR9KJ5y/I=
 golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a h1:WXEvlFVvvGxCJLG6REjsT03iWnKLEWinaScsxF2Vm2o=
 golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=

@@ -139,6 +139,26 @@ func main() {
 					Aliases: []string{"i"},
 					Usage:   "image name created. Default: random generation",
 				},
+				&cli.StringSliceFlag{
+					Name:    "build-args",
+					Aliases: []string{"ba"},
+					Usage:   "build arguments",
+				},
+				&cli.StringSliceFlag{
+					Name:    "environment",
+					Aliases: []string{"e"},
+					Usage:   "run environment",
+				},
+				&cli.StringSliceFlag{
+					Name:    "volume",
+					Aliases: []string{"v"},
+					Usage:   "run volume",
+				},
+				&cli.StringFlag{
+					Name:    "network",
+					Aliases: []string{"net"},
+					Usage:   "run network to connect to",
+				},
 			},
 			Aliases:   []string{"r"},
 			ArgsUsage: "[command(default: Dockerfile definition)] [addition docker flags....]",
@@ -267,7 +287,7 @@ func main() {
 	app.EnableBashCompletion = true
 	app.Name = "Narwhal"
 	app.Description = "A docker utility CLI that allows you to save time"
-	app.Version = "0.3.1"
+	app.Version = "0.3.1r3"
 	app.Usage = "Docker utilities"
 	app.Compiled = time.Now()
 	app.Authors = []*cli.Author{
