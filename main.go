@@ -287,7 +287,7 @@ func main() {
 	app.EnableBashCompletion = true
 	app.Name = "Narwhal"
 	app.Description = "A docker utility CLI that allows you to save time"
-	app.Version = "0.3.8"
+	app.Version = "0.3.9"
 	app.Usage = "Docker utilities"
 	app.Compiled = time.Now()
 	app.Authors = []*cli.Author{
