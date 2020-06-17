@@ -17,16 +17,16 @@ stages:
 
     # setup folder
     - export SERIES=$(lsb_release -cs)
-    - export FOLDER=${FOLDER}-${SERIES}
+    - export FOLDER=${FOLDER}~${SERIES}
     - mkdir -p ${FOLDER}
     - cp ${BINARY} ${FOLDER}/${BINARY}
     - cd ${FOLDER}
     # dh make
-    - env DEBEMAIL=${EMAIL} DEBFULLNAME=${AUTHOR} dh_make --createorig --indep --copyright mit -y
+    - env DEBEMAIL=${EMAIL} DEBFULLNAME=${AUTHOR} dh_make -p ${FOLDER}~{SERIES} --createorig --indep --copyright mit -y
     - rm debian/*ex debian/*.EX debian/README.*
 
     # update control and changelog
-    - perl -i -pe "s/-${SERIES}-1\) unstable/-${SERIES}) $(lsb_release -cs)/" debian/changelog
+    - perl -i -pe "s/unstable/${SERIES}/" debian/changelog
     - perl -i -pe 's/^(Section:).*/$1 $ENV{'SECTION'}/' debian/control
     - perl -i -pe 's/^(Homepage:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
     - perl -i -pe 's/^#(Vcs-Browser:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
