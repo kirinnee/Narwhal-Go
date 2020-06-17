@@ -24,7 +24,7 @@ stages:
     - rm debian/*ex debian/*.EX debian/README.*
 
     # update control and changelog
-    - perl -i -pe "s/-1\) unstable/-1~$(lsb_release -cs)) $(lsb_release -cs)/" changelog
+    - perl -i -pe "s/-1\) unstable/-1~$(lsb_release -cs)) $(lsb_release -cs)/" debian/changelog
     - perl -i -pe 's/^(Section:).*/$1 $ENV{'SECTION'}/' debian/control
     - perl -i -pe 's/^(Homepage:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
     - perl -i -pe 's/^#(Vcs-Browser:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
