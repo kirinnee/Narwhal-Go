@@ -16,7 +16,6 @@ stages:
     - gpg --import-ownertrust ${PGP_TRUST}
 
     # setup folder
-    - export FOLDER=${FOLDER}-$(lsb_release -cs)
     - mkdir -p ${FOLDER}
     - cp ${BINARY} ${FOLDER}/${BINARY}
     - cd ${FOLDER}
@@ -25,7 +24,7 @@ stages:
     - rm debian/*ex debian/*.EX debian/README.*
 
     # update control and changelog
-    - perl -i -pe "s/unstable/$(lsb_release -cs)/" debian/changelog
+    - perl -i -pe "s/-1\) unstable/-1~$(lsb_release -cs)) $(lsb_release -cs)/" changelog
     - perl -i -pe 's/^(Section:).*/$1 $ENV{'SECTION'}/' debian/control
     - perl -i -pe 's/^(Homepage:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
     - perl -i -pe 's/^#(Vcs-Browser:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
@@ -77,29 +76,11 @@ Deploy 16.04:
   <<: *deploy
   image: kirinnee/ubuntu-packager:16.04
 
-Deploy 17.04:
-  <<: *deploy
-  image: kirinnee/ubuntu-packager:17.04
-
 Deploy 18.04:
   <<: *deploy
   image: kirinnee/ubuntu-packager:18.04
 
-Deploy 19.04:
-  <<: *deploy
-  image: kirinnee/ubuntu-packager:19.04
 Deploy 20.04:
   <<: *deploy
   image: kirinnee/ubuntu-packager:20.04
-Deploy 16.10:
-  <<: *deploy
-  image: kirinnee/ubuntu-packager:16.10
-Deploy 17.10:
-  <<: *deploy
-  image: kirinnee/ubuntu-packager:17.10
-Deploy 18.10:
-  <<: *deploy
-  image: kirinnee/ubuntu-packager:18.10
-Deploy 19.10:
-  <<: *deploy
-  image: kirinnee/ubuntu-packager:19.10
+
