@@ -16,6 +16,8 @@ stages:
     - gpg --import-ownertrust ${PGP_TRUST}
 
     # setup folder
+    - export SERIES=$(lsb_release -cs)
+    - export FOLDER=${FOLDER}-${SERIES}
     - mkdir -p ${FOLDER}
     - cp ${BINARY} ${FOLDER}/${BINARY}
     - cd ${FOLDER}
@@ -24,7 +26,7 @@ stages:
     - rm debian/*ex debian/*.EX debian/README.*
 
     # update control and changelog
-    - perl -i -pe "s/-1\) unstable/-1~$(lsb_release -cs)) $(lsb_release -cs)/" debian/changelog
+    - perl -i -pe "s/-${SERIES}-1\) unstable/-1~${SERIES}) $(lsb_release -cs)/" debian/changelog
     - perl -i -pe 's/^(Section:).*/$1 $ENV{'SECTION'}/' debian/control
     - perl -i -pe 's/^(Homepage:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
     - perl -i -pe 's/^#(Vcs-Browser:).*/$1 $ENV{'CI_PROJECT_URL'}/' debian/control
