@@ -17,12 +17,12 @@ stages:
 
     # setup folder
     - export SERIES=$(lsb_release -cs)
-    - export FOLDER=${FOLDER}~${SERIES}
+    - export FOLDER=${FOLDER}-${SERIES}
     - mkdir -p ${FOLDER}
     - cp ${BINARY} ${FOLDER}/${BINARY}
     - cd ${FOLDER}
     # dh make
-    - env DEBEMAIL=${EMAIL} DEBFULLNAME=${AUTHOR} dh_make -p ${FOLDER}~{SERIES} --createorig --indep --copyright mit -y
+    - env DEBEMAIL=${EMAIL} DEBFULLNAME=${AUTHOR} dh_make -p ${FOLDER} --createorig --indep --copyright mit -y
     - rm debian/*ex debian/*.EX debian/README.*
 
     # update control and changelog
