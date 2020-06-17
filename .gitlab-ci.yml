@@ -16,6 +16,7 @@ stages:
     - gpg --import-ownertrust ${PGP_TRUST}
 
     # setup folder
+    - export FOLDER=${FOLDER}-$(lsb_release -cs)
     - mkdir -p ${FOLDER}
     - cp ${BINARY} ${FOLDER}/${BINARY}
     - cd ${FOLDER}
