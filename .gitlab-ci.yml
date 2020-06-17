@@ -4,33 +4,8 @@ stages:
   - build
   - deploy
 
-variables:
-  AUTHOR: kirinnee
-  EMAIL: kirinnee97@gmail.com
-  BINARY: narwhal
-  BINARY_NAME: narwhal
-  FOLDER: ${BINARY_NAME}-${CI_COMMIT_TAG}
-  SECTION: utils
-  DESC_SHORT: Docker command line utility
-  DESC_LONG: Go-based CLI tha help withs common Docker actions, including saving and loading volumes
-  TARGET_PPA: kirinnee/main
-
-Build:
-  stage: build
-  script:
-    - mkdir - p ./build
-    - env GOOS=windows GOARCH=amd64 go build -o ./build/${BINARY}.exe
-    - env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -a -installsuffix cgo -o ./build/${BINARY}
-    - chmod o+x ./build/${BINARY}
-    - env GOOS=darwin GOARCH=amd64 go build -o ./build/${BINARY}.app
-  artifacts:
-    paths:
-      - ./build/
-    expire_in: 90 days
-
-Deploy:
+.deploy-template: &deploy
   stage: deploy
-  image: kirinnee/ubuntu-packager
   script:
     # move binaries
     - cp ./build/${BINARY} .
@@ -72,3 +47,58 @@ Deploy:
     - /^*.*$/
   except:
     - branches
+
+variables:
+  AUTHOR: kirinnee
+  EMAIL: kirinnee97@gmail.com
+  BINARY: narwhal
+  BINARY_NAME: narwhal
+  FOLDER: ${BINARY_NAME}-${CI_COMMIT_TAG}
+  SECTION: utils
+  DESC_SHORT: Docker command line utility
+  DESC_LONG: Go-based CLI tha help withs common Docker actions, including saving and loading volumes
+  TARGET_PPA: kirinnee/main
+
+Build:
+  stage: build
+  script:
+    - mkdir - p ./build
+    - env GOOS=windows GOARCH=amd64 go build -o ./build/${BINARY}.exe
+    - env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -a -installsuffix cgo -o ./build/${BINARY}
+    - chmod o+x ./build/${BINARY}
+    - env GOOS=darwin GOARCH=amd64 go build -o ./build/${BINARY}.app
+  artifacts:
+    paths:
+      - ./build/
+    expire_in: 90 days
+
+Deploy 16.04:
+  <<: *deploy
+  image: kirinnee/ubuntu-packager:16.04
+
+Deploy 17.04:
+  <<: *deploy
+  image: kirinnee/ubuntu-packager:17.04
+
+Deploy 18.04:
+  <<: *deploy
+  image: kirinnee/ubuntu-packager:18.04
+
+Deploy 19.04:
+  <<: *deploy
+  image: kirinnee/ubuntu-packager:19.04
+Deploy 20.04:
+  <<: *deploy
+  image: kirinnee/ubuntu-packager:20.04
+Deploy 16.10:
+  <<: *deploy
+  image: kirinnee/ubuntu-packager:16.10
+Deploy 17.10:
+  <<: *deploy
+  image: kirinnee/ubuntu-packager:17.10
+Deploy 18.10:
+  <<: *deploy
+  image: kirinnee/ubuntu-packager:18.10
+Deploy 19.10:
+  <<: *deploy
+  image: kirinnee/ubuntu-packager:19.10

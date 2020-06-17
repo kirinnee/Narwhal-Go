@@ -4,7 +4,6 @@ import (
 	"fmt"
 	ng "github.com/goombaio/namegenerator"
 	"github.com/urfave/cli/v2"
-	"log"
 	"time"
 )
 
@@ -37,7 +36,6 @@ func run(c *cli.Context) error {
 
 	}
 
-	log.Println("net", net)
 	if net != "" {
 		rest = append(rest, "r:--net")
 		rest = append(rest, "r:"+net)
